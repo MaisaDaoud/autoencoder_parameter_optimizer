@@ -5,5 +5,6 @@ _Autoencoder_parameter_optimizer_ is a tool for optimizing the autoencoders trai
 *To run the code:
 git clone the project and run 
 
-```python3 -W ignore main.py --dataset_name="dataset_name" --train_dataset_file="train_dataset_file.csv" --iterations=100 --rep_length=250
+```
+python3 -W ignore main.py --dataset_name="dataset_name" --train_dataset_file="train_dataset_file.csv" --iterations=100 --rep_length=250
 ```
