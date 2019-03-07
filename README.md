@@ -1,5 +1,5 @@
-#ِAutoencoder_parameter_optimizer
-*Autoencoder_parameter_optimizer* is a tool for optimizing the autoencoders training hypermeters using Prticle swarm optimization (PSO) algorithm , the current version of the tool only 
+Autoencoder_Parameter_Optimizer
+_Autoencoder_parameter_optimizer_ is a tool for optimizing the autoencoders training hypermeters using Prticle swarm optimization (PSO) algorithm , the current version of the tool only 
 optimizes the "learning_rate, epochs, batch_size, n_layers" and returns the best solution the maximizes the accuracy of the
 random forest classifer 
 
