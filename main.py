@@ -2,7 +2,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from pyswarm import pso
-from RBF_all import Autoencoder
+from RBFA import Autoencoder
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 from sklearn.metrics import precision_score,recall_score,f1_score,accuracy_score,roc_auc_score
@@ -10,40 +10,42 @@ from sklearn.metrics import precision_score,recall_score,f1_score,accuracy_score
 # Define the input parameters
 flags = tf.app.flags
 flags.DEFINE_string("dataset_name","AllAML", "the name of the dataset")
-#flags.DEFINE_string("checkpoint_dir", "checkpoin/AllAML", "checkpoint drectory")
-flags.DEFINE_string("train_dataset_file", "AllAML_train","dataset file name")
-flags.DEFINE_string("train_class_file", "AllAML_train_class_run_", "classes are in a separate folder")
-flags.DEFINE_string("test_dataset_file", "AllAML_test", "data_run", "dataset file name")
-flags.DEFINE_string("test_class_file", "AllAML_test_class_run_", "classes are in a separate folder")
+flags.DEFINE_string("train_dataset_file", "AllAML_train_data_run_0.csv","dataset file name")
+flags.DEFINE_string("train_class_file", "AllAML_train_class_run_0.csv", "classes are in a separate folder")
+flags.DEFINE_string("test_dataset_file", "AllAML_test_data_run_0.csv", "dataset file name")
+flags.DEFINE_string("test_class_file", "AllAML_test_class_run_0.csv", "classes are in a separate folder")
+flags.DEFINE_integer("rep_length", "250", "The length of the  generated representation")
 flags.DEFINE_integer("iterations", "2", "max number odf iterations for the pso")
 flags.DEFINE_integer("swarm_size", "3", "pso number of particles")
+
 
 FLAGS = flags.FLAGS
 
 
 def main(_):
     r = 0
-    file_dir = "Representations/"
-    train_data = pd.read_csv(os.path.join(file_dir, "{}_{}".format(FLAGS.train_datast_file, str(r) + ".csv")),
+    file_dir = "data/"
+
+    train_data = pd.read_csv(os.path.join(file_dir, FLAGS.train_dataset_file),
                              header=None,
                              dtype={'my_column': np.float64}, na_values=['n/a'])
 
-    train_class = pd.read_csv(os.path.join(file_dir, "{}_{}".format(FLAGS.train_class_file, str(r) + ".csv")),
+    train_class = pd.read_csv(os.path.join(file_dir,FLAGS.train_class_file),
                               header=None,
                               dtype={'my_column': np.unicode_}, na_values=['n/a'])
-    test_data = pd.read_csv(os.path.join(file_dir, "{}_{}".format(FLAGS.test_data_file, str(r) + ".csv")),
+    test_data = pd.read_csv(os.path.join(file_dir,FLAGS.test_dataset_file),
                             header=None,
                             dtype={'my_column': np.float64}, na_values=['n/a'])
 
-    test_class = pd.read_csv(os.path.join(file_dir, "{}_{}".format(FLAGS.test_class_file, str(r) + ".csv")),
+    test_class = pd.read_csv(os.path.join(file_dir,FLAGS.test_class_file),
                              header=None,
                              dtype={'my_column': np.unicode_}, na_values=['n/a'])
 
     iterations = FLAGS.iterations
     swarm_size = FLAGS.swarm_size
-    #lb = {learning_rate, num_epochs, patch_size,}
-    lb = np.array([0.00001, 100, 2]) # lower_baound limit for the parameters
-    ub = np.array([1,500,10]) #upper bound limit for the parameters
+    #lb = {learning_rate, num_epochs, patch_size,n_layers}
+    lb = np.array([0.00001, 1, 1,1]) # lower_baound limit for the parameters
+    ub = np.array([2,10,10,5]) #upper bound limit for the parameters
 
 
     best_parameters, best_score = find_parameters(train_data,train_class, test_data, test_class,lb,ub,iterations, swarm_size)
@@ -52,16 +54,19 @@ def main(_):
 def find_parameters(train_data, train_class, test_data, test_class, lb, ub, iterations, swarm_size):
     lb = lb * np.ones([1, lb.shape[0]], np.float32)
     ub = ub * np.ones([1, lb.shape[0]], np.float32)
+
     args = (train_data,train_class, test_data, test_class)
     # initial population is hard-coded here
-    pop = [[np.random.random() * 0.001, np.int(np.random.random() * 1000), np.int(np.random.random() * 10 + 1)],
-           [np.random.random() * 0.001, np.int(np.random.random() * 1000), np.int(np.random.random() * 10 + 1)],
-           [np.random.random() * 0.001, np.int(np.random.random() * 1000), np.int(np.random.random() * 10 + 1)],
+    pop = [[np.random.random() * 0.001, np.int(np.random.random() * 1000), np.int(np.random.random() * 10 + 1), np.int(np.random.random() * 10 + 1)],
+           [np.random.random() * 0.001, np.int(np.random.random() * 1000), np.int(np.random.random() * 10 + 1), np.int(np.random.random() * 10 + 1)],
+           [np.random.random() * 0.001, np.int(np.random.random() * 1000), np.int(np.random.random() * 10 + 1), np.int(np.random.random() * 10 + 1)],
            ]
     initial_population = np.array(pop)
+
     # print the initial population
+    print("[*] initial population: ")
     print(initial_population)
-    xopt, fopt = pso(fitness, initial_population, lb, ub, swarmsize=swarm_size, maxiter=iterations, args=args)
+    xopt, fopt = pso(fitness, initial_population,lb,ub, swarmsize=swarm_size, maxiter=iterations, args=args)
     # best_ind.append(xopt)
 
     return xopt, fopt
@@ -79,21 +84,17 @@ def training( train_data, test_data, train_class, test_class, x):
     sess = tf.Session()
     autoencoder_dict_testing = Autoencoder(sess,
                                                    run=r,
+                                                   dataset_dir = FLAGS.dataset_name,
                                                    dataset_name= FLAGS.dataset_name+"_RBF_optimized_parameters",
                                                    epochs= np.int(x[1]),#FLAGS.epochs,
                                                    learning_rate= x[0], #FLAGS.learning_rate,
                                                    batch_size= np.int(x[2]), #FLAGS.batch_size,
-                                                   n_layers=FLAGS.n_layers,
+                                                   n_layers=np.int(x[3]),
                                                    training_data=np.array(train_data.values),
-                                                   training_class=np.array(train_class.values),
                                                    testing_data=np.array(test_data.values),
-                                                   testing_class=np.array(test_class.values),
                                                    checkpoint_dir="checkpoin/"+FLAGS.dataset_name,
                                                    train=True,
-                                                   generate=False,
                                                    test=False,
-                                                   s_number=FLAGS.s_number,
-
                                                    )
 
 
@@ -102,17 +103,15 @@ def classify(train_class, test_class):
     train_data = pd.read_csv(
         "../../../Documents/newProject/AutoencoderOptimizer/Representations/AllAML/AllAML_RBF_optimized_regu_cluster/run_" + str(
             i) + "/Autoencoder/data_train_reps.csv",
-        header=None)  # , sample = 2000000)#,dtype={'my_column': np.float64}, na_values=['n/a'],header = None)
-
+        header=None)
     test_data = pd.read_csv(
         "../../../Documents/newProject/AutoencoderOptimizer/Representations/AllAML/AllAML_RBF_optimized_regu_cluster/run_" + str(
             i) + "/Autoencoder/data_test_reps.csv", dtype=float,
-        header=None)  # , sample = 2000000)#,dtype={'my_column': np.float64}, na_values=['n/a'],header = None)
+        header=None)
+    x_train = np.array(train_data.values, np.float32)  #
+    class_list = np.array(train_class.values)
 
-    x_train = np.array(train_data.values, np.float32)  # xr.DataArray(data_train)##
-    class_list = np.array(train_class.values)  # [1:,]
-
-    x_test = np.array(test_data.values, np.float32)  # data_test.values#xr.DataArray(data_test)#
+    x_test = np.array(test_data.values, np.float32)
     y_test = np.array(test_class.values)
 
     RF_classifier = RandomForestClassifier(n_estimators=100, criterion='entropy', random_state=24)
@@ -121,10 +120,6 @@ def classify(train_class, test_class):
     score = accuracy_score(y_test[:, 0], y_score, normalize=True,
                            sample_weight=None)
     return score
-
-
-
-
 
 if __name__ == "__main__":
     tf.app.run()
