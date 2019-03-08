@@ -60,7 +60,7 @@ class Autoencoder(object):
         n_clusters = self.n_layers
         self.mu, self.sigma = self.clustering(n_clusters)
         self.weights, self.baiases = self.initialize_layers(self.n_layers, self.input_length, self.output_length)
-        print("$$$$$$$$$$ System Parameters $$$$$$$$$$$$$$$$$$")
+        print("$$$$$$$$$$ The models Parameters $$$$$$$$$$$$$$$$$$")
         print("[*] n_RBF_layers", self.n_layers)
         print("[*] n_epochs", self.epochs)
         print("[*] learning_rate", self.learning_rate)
