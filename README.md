@@ -4,8 +4,7 @@ _Autoencoder_parameter_optimizer_ is a tool for optimizing the autoencoders trai
 
 The tool creates  Representation and checkpoint directories for the generated represeantations and trained models respectively. However, The tool over writes the models and the representations during the optimizations process and  does not save the best model. The method developed her can be seen as a surrogate model  for expectsting the best training parameters for a given dataset.
 
-
-
+In this tool, I used the Radia Basis Function based Autoencoder(RBFA) which was acceted recently for IEEE ECE 2019 conference. This new variation of the autoencoder relies on radial activation to the neuronse in the first layer of the networ, a link to the paper will be provided soon.
 
 ### To run the code:
 git clone the project and run 
