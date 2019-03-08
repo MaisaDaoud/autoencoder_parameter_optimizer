@@ -100,13 +100,16 @@ def training( train_data, test_data, train_class, test_class, x):
 
 def classify(train_class, test_class):
     i = 0
+    # for i in range(n_runs) 
     train_data = pd.read_csv(
-        "../../../Documents/newProject/AutoencoderOptimizer/Representations/AllAML/AllAML_RBF_optimized_regu_cluster/run_" + str(
+        "../../../Documents/newProject/AutoencoderOptimizer/Representations/"+FLAGS.dataset_name+"/"+
+        FLAGS.dataset_name+"_RBF_optimized_regu_cluster/run_" + str(
             i) + "/Autoencoder/data_train_reps.csv",
         header=None)
     test_data = pd.read_csv(
-        "../../../Documents/newProject/AutoencoderOptimizer/Representations/AllAML/AllAML_RBF_optimized_regu_cluster/run_" + str(
-            i) + "/Autoencoder/data_test_reps.csv", dtype=float,
+        "../../../Documents/newProject/AutoencoderOptimizer/Representations/"+FLAGS.dataset_name"+/"+ 
+        FLAGS.dataset_name+"_RBF_optimized_regu_cluster/run_" + str(i) +
+        "/Autoencoder/data_test_reps.csv", dtype=float,
         header=None)
     x_train = np.array(train_data.values, np.float32)  #
     class_list = np.array(train_class.values)
